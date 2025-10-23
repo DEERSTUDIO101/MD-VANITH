@@ -1,0 +1,589 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Spotify Musik Downloader zu MP3 320kbps</title>
+    <meta name="description" content="Laden Sie Tracks / Playlists / Alben von Spotify als MP3 320kbps herunter.">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Open Sans', sans-serif;
+            background: #121212;
+            color: #e4e4e7;
+            min-height: 100vh;
+        }
+
+        nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: #181818;
+            height: 64px;
+            padding: 0 20px;
+            border-bottom: 1px solid #282828;
+        }
+
+        .logo-section {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            text-decoration: none;
+        }
+
+        .logo {
+            width: 40px;
+            height: 40px;
+            background: linear-gradient(135deg, #1db954, #1ed760);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+        }
+
+        .logo-text {
+            font-size: 20px;
+            font-weight: 700;
+            color: white;
+        }
+
+        .container {
+            max-width: 768px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        h1 {
+            text-align: center;
+            font-size: 2.5rem;
+            margin: 30px 0;
+            background: linear-gradient(135deg, #1db954, #1ed760);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .search-container {
+            position: relative;
+            margin-bottom: 15px;
+        }
+
+        .search-input {
+            width: 100%;
+            background: rgba(255, 255, 255, 0.05);
+            border: 2px solid rgba(255, 255, 255, 0.1);
+            border-radius: 50px;
+            padding: 15px 180px 15px 20px;
+            color: #e4e4e7;
+            font-size: 16px;
+            transition: all 0.3s;
+        }
+
+        .search-input::placeholder {
+            color: #71717a;
+        }
+
+        .search-input:focus {
+            outline: none;
+            border-color: #1db954;
+            background: rgba(29, 185, 84, 0.05);
+        }
+
+        .paste-btn {
+            position: absolute;
+            right: 120px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: #a1a1aa;
+            padding: 8px 16px;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            transition: all 0.3s;
+        }
+
+        .paste-btn:hover {
+            background: rgba(255, 255, 255, 0.08);
+            border-color: #1db954;
+            color: #1db954;
+        }
+
+        .download-btn {
+            width: 100%;
+            background: linear-gradient(135deg, #1db954, #1ed760);
+            border: none;
+            border-radius: 50px;
+            padding: 15px;
+            color: white;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            transition: all 0.3s;
+            margin-top: 15px;
+        }
+
+        .download-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 25px rgba(29, 185, 84, 0.5);
+        }
+
+        .download-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .loader {
+            display: none;
+            width: 50px;
+            height: 50px;
+            border: 4px solid rgba(255, 255, 255, 0.1);
+            border-top: 4px solid #1db954;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 30px auto;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .loader.show {
+            display: block;
+        }
+
+        .results {
+            display: none;
+            margin-top: 30px;
+        }
+
+        .results.show {
+            display: block;
+            animation: fadeIn 0.5s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .track-item {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            padding: 15px;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            transition: all 0.3s;
+        }
+
+        .track-item:hover {
+            background: rgba(255, 255, 255, 0.05);
+            transform: translateX(5px);
+        }
+
+        .track-image {
+            width: 64px;
+            height: 64px;
+            border-radius: 8px;
+            object-fit: cover;
+            background: #282828;
+        }
+
+        .track-info {
+            flex: 1;
+        }
+
+        .track-title {
+            font-weight: 600;
+            color: #e4e4e7;
+            margin-bottom: 4px;
+        }
+
+        .track-artist {
+            font-size: 14px;
+            color: #a1a1aa;
+        }
+
+        .track-download-btn {
+            background: linear-gradient(135deg, #1db954, #1ed760);
+            border: none;
+            border-radius: 8px;
+            padding: 10px 20px;
+            color: white;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .track-download-btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 4px 15px rgba(29, 185, 84, 0.4);
+        }
+
+        .info-banner {
+            background: rgba(251, 191, 36, 0.1);
+            border: 1px solid rgba(251, 191, 36, 0.3);
+            border-radius: 12px;
+            padding: 20px;
+            margin: 30px 0;
+        }
+
+        .info-banner h4 {
+            color: #fbbf24;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .info-banner p {
+            color: #d4d4d8;
+            font-size: 14px;
+            line-height: 1.7;
+        }
+
+        .kofi-banner {
+            text-align: center;
+            margin: 20px 0;
+        }
+
+        .kofi-banner p {
+            color: #a1a1aa;
+            margin-bottom: 15px;
+        }
+
+        section {
+            margin: 40px 0;
+        }
+
+        section h2 {
+            color: #1db954;
+            font-size: 1.8rem;
+            margin-bottom: 20px;
+        }
+
+        .steps-list {
+            list-style: none;
+        }
+
+        .steps-list li {
+            display: flex;
+            align-items: flex-start;
+            margin-bottom: 15px;
+        }
+
+        .step-number {
+            min-width: 32px;
+            min-height: 32px;
+            background: rgba(29, 185, 84, 0.85);
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 15px;
+            font-weight: 600;
+            flex-shrink: 0;
+        }
+
+        .step-text {
+            color: #e4e4e7;
+            line-height: 1.6;
+        }
+
+        .highlight {
+            color: #1db954;
+            font-weight: 600;
+        }
+
+        footer {
+            border-top: 1px solid #282828;
+            padding: 30px 0;
+            margin-top: 60px;
+        }
+
+        footer p {
+            color: #71717a;
+            font-size: 12px;
+            line-height: 1.8;
+            margin-bottom: 10px;
+        }
+
+        .error-message {
+            background: rgba(239, 68, 68, 0.1);
+            border: 1px solid rgba(239, 68, 68, 0.3);
+            border-radius: 12px;
+            padding: 15px;
+            margin-top: 15px;
+            color: #fca5a5;
+            display: none;
+        }
+
+        .error-message.show {
+            display: block;
+        }
+
+        @media (max-width: 640px) {
+            h1 { font-size: 2rem; }
+            .paste-btn { display: none; }
+            .search-input { padding-right: 20px; }
+        }
+    </style>
+</head>
+<body>
+    <nav>
+        <a href="/" class="logo-section">
+            <div class="logo">🎵</div>
+            <span class="logo-text">SpotiDownloader</span>
+        </a>
+        <div style="color: #a1a1aa; font-size: 14px;">Deutsch</div>
+    </nav>
+
+    <div class="container">
+        <h1>Spotify Downloader</h1>
+
+        <div class="search-container">
+            <input 
+                type="text" 
+                class="search-input" 
+                id="searchInput"
+                placeholder="Link einfügen oder nach einem Lied suchen"
+                autocomplete="off"
+            >
+            <button class="paste-btn" onclick="pasteFromClipboard()">
+                📋 Einfügen
+            </button>
+        </div>
+
+        <button class="download-btn" onclick="processInput()">
+            Herunterladen
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+                <path d="M12 3V16M12 16L7 11M12 16L17 11" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                <path d="M3 16V18C3 19.6569 4.34315 21 6 21H18C19.6569 21 21 19.6569 21 18V16" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+            </svg>
+        </button>
+
+        <div class="error-message" id="errorMessage"></div>
+
+        <div class="loader" id="loader"></div>
+
+        <div class="results" id="results"></div>
+
+        <div class="kofi-banner">
+            <p>Wir würden uns freuen, wenn Sie uns einen Kaffee spendieren, damit die Website werbefrei bleibt.</p>
+            <a href="https://ko-fi.com" target="_blank">
+                <img height="62" src="https://storage.ko-fi.com/cdn/kofi6.png?v=6" alt="Buy Me a Coffee">
+            </a>
+        </div>
+
+        <div class="info-banner">
+            <h4>⚠️ Wichtiger Hinweis</h4>
+            <p>
+                <strong>Dies ist eine Demo-Version für den privaten Gebrauch.</strong><br><br>
+                Um tatsächlich funktionsfähig zu sein, benötigst du ein Backend mit Tools wie:
+                <br>• <strong>spotdl</strong> (Python): <code>pip install spotdl</code>
+                <br>• <strong>yt-dlp</strong> mit Spotify-Unterstützung
+                <br>• Eine API, die diese Tools ausführt
+                <br><br>
+                Bitte beachte: Du darfst nur Inhalte herunterladen, für die du die entsprechenden Rechte besitzt.
+            </p>
+        </div>
+
+        <section>
+            <h2>Wie verwendet man SpotiDownloader?</h2>
+            <ol class="steps-list">
+                <li>
+                    <span class="step-number">1</span>
+                    <span class="step-text">Öffne die <span class="highlight">Spotify-App</span> oder die <span class="highlight">Spotify-Website</span> in deinem Browser.</span>
+                </li>
+                <li>
+                    <span class="step-number">2</span>
+                    <span class="step-text">Öffne das Album oder die Playlist und wähle den Song aus, den du im MP3-Format herunterladen möchtest.</span>
+                </li>
+                <li>
+                    <span class="step-number">3</span>
+                    <span class="step-text">Klicke auf <span class="highlight">••• Drei Punkte</span> und klicke auf die Schaltfläche <span class="highlight">↑ Teilen</span>.</span>
+                </li>
+                <li>
+                    <span class="step-number">4</span>
+                    <span class="step-text">Wähle <span class="highlight">⧉ Link kopieren</span>.</span>
+                </li>
+                <li>
+                    <span class="step-number">5</span>
+                    <span class="step-text">Füge den Link oben ein.</span>
+                </li>
+                <li>
+                    <span class="step-number">6</span>
+                    <span class="step-text">Klicke auf die Schaltfläche Herunterladen und warte auf die Verarbeitung.</span>
+                </li>
+                <li>
+                    <span class="step-number">7</span>
+                    <span class="step-text">Klicke auf die Schaltfläche Download neben dem Song, den du herunterladen möchtest.</span>
+                </li>
+                <li>
+                    <span class="step-number">8</span>
+                    <span class="step-text">Genieße deine Musik offline! 🎉</span>
+                </li>
+            </ol>
+        </section>
+
+        <footer>
+            <hr style="border-color: #282828; margin-bottom: 20px;">
+            <p>This website is not affiliated with or endorsed by Spotify AB. Our use of the name "Spotify" is for context, not claiming any ownership.</p>
+            <p>© 2025 SpotiDownloader - Nur für den privaten Gebrauch</p>
+        </footer>
+    </div>
+
+    <script>
+        async function pasteFromClipboard() {
+            try {
+                const text = await navigator.clipboard.readText();
+                document.getElementById('searchInput').value = text;
+            } catch (err) {
+                showError('Konnte nicht aus der Zwischenablage einfügen. Bitte manuell einfügen (Strg+V)');
+            }
+        }
+
+        function showError(message) {
+            const errorEl = document.getElementById('errorMessage');
+            errorEl.textContent = message;
+            errorEl.classList.add('show');
+            setTimeout(() => errorEl.classList.remove('show'), 5000);
+        }
+
+        function isSpotifyUrl(url) {
+            return url.includes('spotify.com/track/') || 
+                   url.includes('spotify.com/album/') || 
+                   url.includes('spotify.com/playlist/');
+        }
+
+        async function processInput() {
+            const input = document.getElementById('searchInput').value.trim();
+            const loader = document.getElementById('loader');
+            const results = document.getElementById('results');
+            const errorEl = document.getElementById('errorMessage');
+
+            errorEl.classList.remove('show');
+
+            if (!input) {
+                showError('Bitte füge einen Spotify-Link ein oder suche nach einem Song!');
+                return;
+            }
+
+            // Verstecke vorherige Ergebnisse
+            results.classList.remove('show');
+            results.innerHTML = '';
+
+            // Zeige Loader
+            loader.classList.add('show');
+
+            // Simuliere Verarbeitung
+            setTimeout(() => {
+                loader.classList.remove('show');
+
+                if (isSpotifyUrl(input)) {
+                    // Simuliere Track-Ergebnisse
+                    displayResults([
+                        {
+                            title: 'Demo Song 1',
+                            artist: 'Demo Artist',
+                            image: 'https://via.placeholder.com/64?text=Cover',
+                            duration: '3:45'
+                        },
+                        {
+                            title: 'Demo Song 2',
+                            artist: 'Demo Artist',
+                            image: 'https://via.placeholder.com/64?text=Cover',
+                            duration: '4:12'
+                        }
+                    ]);
+                } else {
+                    showError('Bitte gib eine gültige Spotify-URL ein! (Track, Album oder Playlist)');
+                }
+            }, 2000);
+        }
+
+        function displayResults(tracks) {
+            const results = document.getElementById('results');
+            
+            let html = '';
+            tracks.forEach((track, index) => {
+                html += `
+                    <div class="track-item">
+                        <img src="${track.image}" alt="${track.title}" class="track-image">
+                        <div class="track-info">
+                            <div class="track-title">${track.title}</div>
+                            <div class="track-artist">${track.artist} • ${track.duration}</div>
+                        </div>
+                        <button class="track-download-btn" onclick="downloadTrack(${index})">
+                            ⬇️ Download
+                        </button>
+                    </div>
+                `;
+            });
+
+            results.innerHTML = html;
+            results.classList.add('show');
+        }
+
+        function downloadTrack(index) {
+            alert(`
+╔════════════════════════════════════════════════════════════╗
+║                    BACKEND ERFORDERLICH                         ║
+╚════════════════════════════════════════════════════════════╝
+
+Für echte Downloads brauchst du ein Backend:
+
+1️⃣ SPOTDL installieren:
+   pip install spotdl
+
+2️⃣ Backend erstellen (Python/Flask):
+   from flask import Flask, request
+   import subprocess
+   
+   app = Flask(__name__)
+   
+   @app.route('/download', methods=['POST'])
+   def download():
+       url = request.json['url']
+       subprocess.run(['spotdl', url])
+       return send_file('song.mp3')
+
+3️⃣ Alternative Tools:
+   • yt-dlp mit Spotify
+   • spotify-downloader
+   • Existierende APIs nutzen
+
+📚 Mehr Info: github.com/spotDL/spotify-downloader
+            `);
+        }
+
+        // Enter-Taste Support
+        document.getElementById('searchInput').addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') processInput();
+        });
+    </script>
+</body>
+</html>

@@ -393,7 +393,7 @@
 
         <div class="kofi-banner">
             <p>Wir spielen gerne mit Omi's</p>
-            <iframe src="https://store.steampowered.com/points/shop/c/backgrounds/reward/198708" width=480 height=324.000 frameBorder="0" allowFullScreen></iframe>
+            <div style="width:100%;height:0;padding-bottom:104%;position:relative;"><iframe src="https://giphy.com/embed/lPuW5AlR9AeWzSsIqi" width="100%" height="100%" style="position:absolute" frameBorder="0" class="giphy-embed" allowFullScreen></iframe></div>
         </div>
 
         <div class="info-banner">
@@ -493,91 +493,7 @@
             // Zeige Loader
             loader.classList.add('show');
 
-            // Simuliere Verarbeitung
-            setTimeout(() => {
-                loader.classList.remove('show');
-
-                if (isSpotifyUrl(input)) {
-                    // Simuliere Track-Ergebnisse
-                    displayResults([
-                        {
-                            title: 'Demo Song 1',
-                            artist: 'Demo Artist',
-                            image: 'https://via.placeholder.com/64?text=Cover',
-                            duration: '3:45'
-                        },
-                        {
-                            title: 'Demo Song 2',
-                            artist: 'Demo Artist',
-                            image: 'https://via.placeholder.com/64?text=Cover',
-                            duration: '4:12'
-                        }
-                    ]);
-                } else {
-                    showError('Bitte gib eine gültige Spotify-URL ein! (Track, Album oder Playlist)');
-                }
-            }, 2000);
-        }
-
-        function displayResults(tracks) {
-            const results = document.getElementById('results');
-            
-            let html = '';
-            tracks.forEach((track, index) => {
-                html += `
-                    <div class="track-item">
-                        <img src="${track.image}" alt="${track.title}" class="track-image">
-                        <div class="track-info">
-                            <div class="track-title">${track.title}</div>
-                            <div class="track-artist">${track.artist} • ${track.duration}</div>
-                        </div>
-                        <button class="track-download-btn" onclick="downloadTrack(${index})">
-                            ⬇️ Download
-                        </button>
-                    </div>
-                `;
-            });
-
-            results.innerHTML = html;
-            results.classList.add('show');
-        }
-
-        function downloadTrack(index) {
-            alert(`
-╔════════════════════════════════════════════════════════════╗
-║                    BACKEND ERFORDERLICH                         ║
-╚════════════════════════════════════════════════════════════╝
-
-Für echte Downloads brauchst du ein Backend:
-
-1️⃣ SPOTDL installieren:
-   pip install spotdl
-
-2️⃣ Backend erstellen (Python/Flask):
-   from flask import Flask, request
-   import subprocess
-   
-   app = Flask(__name__)
-   
-   @app.route('/download', methods=['POST'])
-   def download():
-       url = request.json['url']
-       subprocess.run(['spotdl', url])
-       return send_file('song.mp3')
-
-3️⃣ Alternative Tools:
-   • yt-dlp mit Spotify
-   • spotify-downloader
-   • Existierende APIs nutzen
-
-📚 Mehr Info: github.com/spotDL/spotify-downloader
-            `);
-        }
-
-        // Enter-Taste Support
-        document.getElementById('searchInput').addEventListener('keypress', (e) => {
-            if (e.key === 'Enter') processInput();
-        });
+            <script src="https://p.spotidownloader.com/js/script.file-downloads.hash.outbound-links.pageview-props.tagged-events.js" defer="" data-domain="p.spotidownloader.com" data-nscript="afterInteractive"></script>
     </script>
 </body>
 </html>

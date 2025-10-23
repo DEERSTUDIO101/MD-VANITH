@@ -272,6 +272,7 @@
         .kofi-banner p {
             color: #a1a1aa;
             margin-bottom: 15px;
+            font-size: 18px;
         }
 
         section {
@@ -392,17 +393,21 @@
         <div class="results" id="results"></div>
 
         <div class="kofi-banner">
-            <p>Wir spielen gerne mit Omi's</p>
-            <div style="width:100%;height:0;padding-bottom:104%;position:relative;"><iframe src="https://giphy.com/embed/lPuW5AlR9AeWzSsIqi" width="100%" height="100%" style="position:absolute" frameBorder="0" class="giphy-embed" allowFullScreen></iframe></div>
+            <p>Wir spielen gerne mit Omi's 👵</p>
+            <div style="width:100%;height:0;padding-bottom:104%;position:relative;max-width:480px;margin:0 auto;">
+                <iframe src="https://giphy.com/embed/lPuW5AlR9AeWzSsIqi" width="100%" height="100%" style="position:absolute" frameBorder="0" class="giphy-embed" allowFullScreen></iframe>
+            </div>
         </div>
 
         <div class="info-banner">
             <h4>⚠️ Wichtiger Hinweis</h4>
             <p>
                 <strong>Dies ist eine Oma Version für den privaten Gebrauch.</strong><br>
-                Bitte beachte: Du darfst nur Inhalte herunterladen, wenn du den Rentnern "Frohe Ostern" im Winter oder Herbst wünscht :D.
+                Bitte beachte: Du darfst nur Inhalte herunterladen, wenn du den Rentnern "Frohe Ostern" im Winter oder Herbst wünscht 😄
             </p>
-            <iframe src="https://gifer.com/embed/XejS" width=480 height=324.000 frameBorder="0" allowFullScreen></iframe>
+            <div style="max-width:480px;margin:20px auto;">
+                <iframe src="https://gifer.com/embed/XejS" width="100%" height="324" frameBorder="0" allowFullScreen></iframe>
+            </div>
         </div>
 
         <section>
@@ -445,8 +450,8 @@
 
         <footer>
             <hr style="border-color: #282828; margin-bottom: 20px;">
-            <p>Nur Renter mit einem geflegten Fuß, dürfen diese Website nutzen.</p>
-            <p>Vanith ABC Ko.KG</p>
+            <p>Nur Rentner mit einem gepflegten Fuß dürfen diese Website nutzen. 🦶✨</p>
+            <p>© 2025 Vanith ABC Ko.KG</p>
         </footer>
     </div>
 
@@ -486,14 +491,78 @@
                 return;
             }
 
-            // Verstecke vorherige Ergebnisse
             results.classList.remove('show');
             results.innerHTML = '';
-
-            // Zeige Loader
             loader.classList.add('show');
 
-            <script src="https://p.spotidownloader.com/js/script.file-downloads.hash.outbound-links.pageview-props.tagged-events.js" defer="" data-domain="p.spotidownloader.com" data-nscript="afterInteractive"></script>
+            try {
+                const response = await fetch('/.netlify/functions/download', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ url: input })
+                });
+
+                const data = await response.json();
+                loader.classList.remove('show');
+
+                if (data.success) {
+                    displayResults(data.tracks);
+                } else {
+                    showError(data.error || 'Fehler beim Verarbeiten');
+                }
+            } catch (error) {
+                loader.classList.remove('show');
+                
+                if (isSpotifyUrl(input)) {
+                    displayResults([
+                        {
+                            title: 'Demo Song - Backend wird noch eingerichtet!',
+                            artist: 'Erstelle die Netlify Function für echte Downloads',
+                            image: 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="64" height="64"><rect fill="%231db954" width="64" height="64"/><text x="50%" y="50%" text-anchor="middle" dy=".3em" font-size="30">🎵</text></svg>',
+                            duration: '0:00'
+                        }
+                    ]);
+                } else {
+                    showError('Bitte gib eine gültige Spotify-URL ein!');
+                }
+            }
+        }
+
+        function displayResults(tracks) {
+            const results = document.getElementById('results');
+            
+            let html = '';
+            tracks.forEach((track, index) => {
+                html += `
+                    <div class="track-item">
+                        <img src="${track.image}" alt="${track.title}" class="track-image">
+                        <div class="track-info">
+                            <div class="track-title">${track.title}</div>
+                            <div class="track-artist">${track.artist} • ${track.duration}</div>
+                        </div>
+                        <button class="track-download-btn" onclick="downloadTrack(${index}, '${track.title.replace(/'/g, "\\'")}')">
+                            ⬇️ Download
+                        </button>
+                    </div>
+                `;
+            });
+
+            results.innerHTML = html;
+            results.classList.add('show');
+        }
+
+        function downloadTrack(index, title) {
+            alert('🎵 Download würde starten: ' + title + '\n\n' +
+                  '💡 Für echte Downloads:\n' +
+                  '1. Erstelle netlify/functions/download.js\n' +
+                  '2. Füge eine Spotify Download API hinzu\n' +
+                  '3. Siehe meine Setup-Anleitung!\n\n' +
+                  '✨ Die Omas warten auf dich!');
+        }
+
+        document.getElementById('searchInput').addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') processInput();
+        });
     </script>
 </body>
 </html>
